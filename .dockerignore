@@ -1,0 +1,14 @@
+node_modules
+npm-debug.log
+.env
+.env.local
+.git
+.gitignore
+README.md
+README_EN.md
+backend/uploads
+backend/frames
+backend/output
+frontend/build
+.DS_Store
+*.log
