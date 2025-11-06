@@ -49,6 +49,13 @@
   border-color: #667eea;
 }
 
+.hint-text {
+  margin-top: 8px;
+  font-size: 0.85rem;
+  color: #999;
+  line-height: 1.4;
+}
+
 .recording-section {
   margin-bottom: 15px;
 }

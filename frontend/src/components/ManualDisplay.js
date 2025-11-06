@@ -1,10 +1,16 @@
 import React, { useState } from 'react';
+import axios from 'axios';
 import './ManualDisplay.css';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
-function ManualDisplay({ manual, onReset }) {
+function ManualDisplay({ manual: initialManual, onReset }) {
+  const [manual, setManual] = useState(initialManual);
   const [selectedImage, setSelectedImage] = useState(null);
+  const [refinementInstruction, setRefinementInstruction] = useState('');
+  const [isRefining, setIsRefining] = useState(false);
+  const [showRefinementInput, setShowRefinementInput] = useState(false);
+  const [refinementError, setRefinementError] = useState(null);
 
   const handlePrint = () => {
     window.print();
@@ -47,6 +53,35 @@ function ManualDisplay({ manual, onReset }) {
     return content;
   };
 
+  const handleRefine = async () => {
+    if (!refinementInstruction.trim()) {
+      setRefinementError('修正内容を入力してください');
+      return;
+    }
+
+    setIsRefining(true);
+    setRefinementError(null);
+
+    try {
+      const response = await axios.post(`${API_URL}/api/refine-manual`, {
+        manual: manual,
+        instruction: refinementInstruction
+      });
+
+      setManual(response.data.manual);
+      setRefinementInstruction('');
+      setShowRefinementInput(false);
+
+      // Show success message
+      alert('✨ 手順書を修正しました！');
+    } catch (error) {
+      console.error('Refinement error:', error);
+      setRefinementError(error.response?.data?.error || '修正中にエラーが発生しました');
+    } finally {
+      setIsRefining(false);
+    }
+  };
+
   const getImageUrl = (imageIndex) => {
     if (!manual.frames || !manual.frames[imageIndex - 1]) {
       return null;
@@ -76,6 +111,57 @@ function ManualDisplay({ manual, onReset }) {
           <div className="success-badge">
             ✅ 手順書が生成されました
           </div>
+        </div>
+
+        {/* Refinement section */}
+        <div className="refinement-section">
+          {!showRefinementInput ? (
+            <button
+              onClick={() => setShowRefinementInput(true)}
+              className="refine-toggle-btn"
+            >
+              ✏️ AIに修正を依頼する
+            </button>
+          ) : (
+            <div className="refinement-input-area">
+              <h3>🤖 AIに修正を依頼</h3>
+              <p className="refinement-hint">
+                修正してほしい内容を自然な言葉で入力してください
+              </p>
+              <textarea
+                value={refinementInstruction}
+                onChange={(e) => setRefinementInstruction(e.target.value)}
+                placeholder="例: ステップ3をもっと詳しく説明して&#13;&#10;例: 必要なものに「お湯」を追加して&#13;&#10;例: 注意点をもっと強調して&#13;&#10;例: 全体的にもっと簡潔にして"
+                rows={4}
+                disabled={isRefining}
+              />
+              {refinementError && (
+                <div className="refinement-error">
+                  {refinementError}
+                </div>
+              )}
+              <div className="refinement-actions">
+                <button
+                  onClick={handleRefine}
+                  className="refine-submit-btn"
+                  disabled={isRefining || !refinementInstruction.trim()}
+                >
+                  {isRefining ? '修正中...' : '✨ 修正を依頼'}
+                </button>
+                <button
+                  onClick={() => {
+                    setShowRefinementInput(false);
+                    setRefinementInstruction('');
+                    setRefinementError(null);
+                  }}
+                  className="refine-cancel-btn"
+                  disabled={isRefining}
+                >
+                  キャンセル
+                </button>
+              </div>
+            </div>
+          )}
         </div>
 
         <section className="manual-section">

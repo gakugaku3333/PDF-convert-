@@ -88,18 +88,15 @@ function VideoUpload({ onManualGenerated, onLoading, onError }) {
       return;
     }
 
-    if (!topic.trim()) {
-      onError('手順書のテーマを入力してください');
-      return;
-    }
-
     try {
       onLoading(true, '動画をアップロード中...');
 
       // Upload video
       const formData = new FormData();
       formData.append('video', videoFile);
-      formData.append('topic', topic);
+      if (topic.trim()) {
+        formData.append('topic', topic);
+      }
 
       const uploadResponse = await axios.post(`${API_URL}/api/upload`, formData, {
         headers: {
@@ -115,18 +112,21 @@ function VideoUpload({ onManualGenerated, onLoading, onError }) {
       const processResponse = await axios.post(`${API_URL}/api/process`, {
         videoId,
         filename,
-        topic
+        topic: topic.trim() || undefined
       });
 
       const { frames } = processResponse.data;
 
-      onLoading(true, 'AIが手順書を生成中... (数秒かかります)');
+      const loadingMsg = topic.trim()
+        ? 'AIが手順書を生成中... (数秒かかります)'
+        : 'AIが動画を分析して手順書を生成中... (数秒かかります)';
+      onLoading(true, loadingMsg);
 
       // Generate manual using Gemini AI
       const manualResponse = await axios.post(`${API_URL}/api/generate-manual`, {
         videoId,
         frames,
-        topic
+        topic: topic.trim() || undefined
       });
 
       onManualGenerated(manualResponse.data.manual);
@@ -146,20 +146,20 @@ function VideoUpload({ onManualGenerated, onLoading, onError }) {
       <div className="upload-card">
         <h2>動画から手順書を作成</h2>
         <p className="description">
-          スマートフォンで作業手順を撮影し、AIが自動で分かりやすい手順書を生成します
+          スマートフォンで作業手順を撮影すると、AIが動画を分析して自動で手順書を生成します
         </p>
 
         <form onSubmit={handleSubmit}>
           <div className="form-group">
-            <label htmlFor="topic">手順書のテーマ</label>
+            <label htmlFor="topic">手順書のテーマ（任意）</label>
             <input
               type="text"
               id="topic"
-              placeholder="例: コーヒーの淹れ方、機器の操作方法など"
+              placeholder="空欄の場合、AIが動画から自動判定します"
               value={topic}
               onChange={(e) => setTopic(e.target.value)}
-              required
             />
+            <p className="hint-text">※テーマを入力すると、より正確な手順書が生成されます</p>
           </div>
 
           <div className="form-group">
@@ -221,7 +221,7 @@ function VideoUpload({ onManualGenerated, onLoading, onError }) {
           <button
             type="submit"
             className="submit-btn"
-            disabled={!videoFile || !topic.trim()}
+            disabled={!videoFile}
           >
             ✨ 手順書を生成する
           </button>

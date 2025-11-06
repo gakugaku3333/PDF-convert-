@@ -5,7 +5,7 @@ const path = require('path');
 const fs = require('fs');
 const dotenv = require('dotenv');
 const { processVideo } = require('./services/videoProcessor');
-const { generateManual } = require('./services/manualGenerator');
+const { generateManual, refineManual } = require('./services/manualGenerator');
 
 dotenv.config();
 
@@ -80,12 +80,11 @@ app.post('/api/upload', upload.single('video'), async (req, res) => {
     }
 
     const { topic } = req.body;
-    if (!topic) {
-      return res.status(400).json({ error: 'Topic description is required' });
-    }
-
     const videoPath = req.file.path;
     const videoId = path.parse(req.file.filename).name;
+
+    console.log('Video uploaded:', req.file.filename);
+    console.log('Topic:', topic || 'Auto-detect from video');
 
     res.json({
       success: true,
@@ -141,11 +140,12 @@ app.post('/api/generate-manual', async (req, res) => {
   try {
     const { videoId, frames, topic } = req.body;
 
-    if (!videoId || !frames || !topic) {
+    if (!videoId || !frames) {
       return res.status(400).json({ error: 'Missing required parameters' });
     }
 
     console.log('Generating manual with Gemini API...');
+    console.log('Topic:', topic || 'Auto-detect from video');
     const manual = await generateManual(frames, topic, framesDir);
 
     res.json({
@@ -155,6 +155,30 @@ app.post('/api/generate-manual', async (req, res) => {
 
   } catch (error) {
     console.error('Manual generation error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Refine existing manual based on user instructions
+app.post('/api/refine-manual', async (req, res) => {
+  try {
+    const { manual, instruction } = req.body;
+
+    if (!manual || !instruction) {
+      return res.status(400).json({ error: 'Missing required parameters' });
+    }
+
+    console.log('Refining manual with user instruction...');
+    console.log('Instruction:', instruction);
+    const refinedManual = await refineManual(manual, instruction, framesDir);
+
+    res.json({
+      success: true,
+      manual: refinedManual
+    });
+
+  } catch (error) {
+    console.error('Manual refinement error:', error);
     res.status(500).json({ error: error.message });
   }
 });

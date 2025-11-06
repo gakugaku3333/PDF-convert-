@@ -7,8 +7,10 @@ A mobile-friendly web application that automatically generates step-by-step inst
 - 📱 **Mobile-Friendly**: Responsive design for iPhone & Android
 - 🎥 **Video Recording**: Record videos directly in the browser
 - 📤 **File Upload**: Upload existing video files
-- 🤖 **AI Analysis**: High-accuracy content analysis using Gemini API
+- 🤖 **AI Analysis**: High-accuracy content analysis using Gemini 2.0 Flash Exp
+- 🎯 **Auto-Detect Topic**: No need to input topic - AI automatically detects from video
 - 📝 **Auto-Generate Manuals**: Create detailed step-by-step instructions
+- ✏️ **Interactive Refinement**: Request AI to refine the manual with natural language
 - 🖼️ **Images Included**: Automatically associate images with each step
 - 🖨️ **Print & Download**: Export manuals as text or print them
 - 🌐 **PWA Support**: Install as an app on your home screen
@@ -136,14 +138,19 @@ Access the application:
 
 ## 📱 How to Use
 
-### 1. Enter Topic
+### 1. Enter Topic (Optional)
 
-Describe what the manual is about.
+Describe what the manual is about (optional).
 
-Examples:
+**If you enter a topic**:
 - "How to make coffee"
 - "Smartphone initial setup"
 - "Printer ink replacement"
+
+**If you don't enter a topic**:
+- AI will automatically analyze and detect the topic from the video
+
+💡 **Tip**: Entering a topic helps generate more accurate manuals
 
 ### 2. Prepare Video
 
@@ -165,9 +172,30 @@ Choose one method:
 2. AI analyzes the video (usually 30s-1min)
 3. Review the generated manual
 
-### 4. Use the Manual
+### 4. Request AI Refinement (NEW! ✨)
+
+If you're not satisfied with the generated manual, you can request AI to refine it using natural language:
+
+1. Click "Request AI to Refine"
+2. Enter your refinement instruction in natural language
+
+**Examples**:
+- "Explain step 3 in more detail"
+- "Add 'hot water' to the requirements"
+- "Emphasize the cautions more"
+- "Make it more concise overall"
+- "Rewrite for beginners"
+
+3. Click "Request Refinement"
+4. AI refines the manual (several seconds~10 seconds)
+5. Review the refined manual
+
+💡 **Tip**: You can request refinements multiple times!
+
+### 5. Use the Manual
 
 - 📄 **View**: Display steps with images
+- ✏️ **Refine**: Request AI to improve the content
 - 🖨️ **Print**: Print the manual
 - 💾 **Download**: Save as text file
 - 🔄 **New**: Create a new manual
